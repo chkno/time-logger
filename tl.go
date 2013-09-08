@@ -88,7 +88,7 @@ func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
 	td.DayWidth = 100.0/float32(len(days))
 	prevname := ""
 	for _, day := range days {
-		output := "<div class='day'>"
+		output := ""
 		prevtime := 0
 		for _, event := range events[day] {
 			output += print_event(event.Time-prevtime, prevname)
@@ -100,7 +100,6 @@ func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
 		} else {
 			output += print_event(daylength-prevtime, prevname)
 		}
-		output += "</div>"
 		td.Days = append(td.Days, TemplateDay{template.HTML(output)})
 	}
 	return

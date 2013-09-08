@@ -27,7 +27,7 @@
   </head>
   <body>
     {{range .Days}}
-      {{.HTML}}
+      <div class='day'>{{.HTML}}</div>
     {{end}}
   </body>
 </html>
