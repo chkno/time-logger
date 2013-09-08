@@ -1,1 +1,24 @@
-{{.HTML}}
+<html><head><style type='text/css'>
+      body { margin: 0; padding: 0; height: 100% }
+      html, day { margin: 0; padding: 0; height: 100% }
+      .day { width: {{.DayWidth}}%; float: left }
+      .event_outer { overflow: hidden; margin: 0 }
+      .event_inner { height: 100%; padding: 2px; border: thin solid black;
+                     font-family: Verdana, Geneva, sans-serif; 
+                     color: white; font-weight: bold }
+    </style>
+    <script type="text/javascript">
+      document.onkeypress = function(e) {
+        e = e || window.event;
+        var dir; var scale;
+        switch(e.keyCode) {
+          case 122: document.body.style.height = document.body.style.width = "100%"; return;
+          case 107: case 119:  dir = "height"; factor = 9/10; break;
+          case 106: case 115:  dir = "height"; factor = 10/9; break;
+          case 104: case  97:  dir = "width"; factor = 9/10; break;
+          case 108: case 100:  dir = "width"; factor = 10/9; break;
+          default: return;
+        }
+        document.body.style[dir] = (parseInt(document.body.style[dir] || "100%") * factor) + "%";
+      }
+    </script></head><body>{{.Body}}</body></html>
