@@ -19,8 +19,12 @@ type Event struct {
 	Time int
 }
 
-type TemplateDay struct {
+type TemplateEvent struct {
 	HTML template.HTML
+}
+
+type TemplateDay struct {
+	Events []TemplateEvent
 }
 
 type TemplateData struct {
@@ -73,12 +77,13 @@ func summarize_time(duration int) string {
 	return fmt.Sprintf("%d sec", duration)
 }
 
-func print_event(duration int, title string) string {
+func print_event(duration int, title string) TemplateEvent {
 	height := 100 * float32(duration) / daylength
 	color := hash_color(title)
-	return fmt.Sprint("<div class='event_outer' style='background-color: ", color,
-		"; height: ", height, "%'><div class='event_inner'><span title='", title,
-		" (", summarize_time(duration), ")'>", title, "</span></div></div>")
+	return TemplateEvent{template.HTML(
+		fmt.Sprint("<div class='event_outer' style='background-color: ", color,
+			"; height: ", height, "%'><div class='event_inner'><span title='", title,
+			" (", summarize_time(duration), ")'>", title, "</span></div></div>"))}
 }
 
 func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
@@ -88,19 +93,19 @@ func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
 	td.DayWidth = 100.0 / float32(len(days))
 	prevname := ""
 	for _, day := range days {
-		output := ""
+		var tday TemplateDay
 		prevtime := 0
 		for _, event := range events[day] {
-			output += print_event(event.Time-prevtime, prevname)
+			tday.Events = append(tday.Events, print_event(event.Time-prevtime, prevname))
 			prevtime = event.Time
 			prevname = event.Name
 		}
 		if day == today {
-			output += print_event(now-prevtime, prevname)
+			tday.Events = append(tday.Events, print_event(now-prevtime, prevname))
 		} else {
-			output += print_event(daylength-prevtime, prevname)
+			tday.Events = append(tday.Events, print_event(daylength-prevtime, prevname))
 		}
-		td.Days = append(td.Days, TemplateDay{template.HTML(output)})
+		td.Days = append(td.Days, tday)
 	}
 	return
 }

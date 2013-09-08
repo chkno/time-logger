@@ -27,7 +27,11 @@
   </head>
   <body>
     {{range .Days}}
-      <div class='day'>{{.HTML}}</div>
+      <div class='day'>
+        {{range .Events}}
+          {{.HTML}}
+        {{end}}
+      </div>
     {{end}}
   </body>
 </html>
