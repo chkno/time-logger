@@ -29,7 +29,11 @@
     {{range .Days}}
       <div class='day'>
         {{range .Events}}
-          {{.HTML}}
+          <div class='event_outer' style='background-color: {{.Color}}; height: {{.Height}}%'>
+            <div class='event_inner'>
+              <span title='{{.Title}} ({{.Duration}})'>{{.Title}}</span>
+            </div>
+          </div>
         {{end}}
       </div>
     {{end}}
