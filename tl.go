@@ -25,7 +25,7 @@ type TemplateDay struct {
 
 type TemplateData struct {
 	DayWidth float32
-	Days []TemplateDay
+	Days     []TemplateDay
 }
 
 func read_data_file(in io.Reader) (days []Day, events map[Day]([]Event)) {
@@ -85,7 +85,7 @@ func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
 	now_time := time.Now()
 	now := now_time.Hour()*3600 + now_time.Minute()*60 + now_time.Second()
 	today := Day(fmt.Sprintf("%04d%02d%02d", now_time.Year(), now_time.Month(), now_time.Day()))
-	td.DayWidth = 100.0/float32(len(days))
+	td.DayWidth = 100.0 / float32(len(days))
 	prevname := ""
 	for _, day := range days {
 		output := ""
