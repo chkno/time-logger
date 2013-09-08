@@ -63,19 +63,19 @@ func summarize_time(duration int) string {
   return fmt.Sprintf("%d sec", duration)
 }
 
-func print_event(duration int, title string) {
+func print_event(duration int, title string) string {
   height := 100 * float32(duration) / daylength
   color := hash_color(title)
-  fmt.Print("<div class='event_outer' style='background-color: ", color,
+  return fmt.Sprint("<div class='event_outer' style='background-color: ", color,
             "; height: ", height, "%'><div class='event_inner'><span title='", title,
             " (", summarize_time(duration), ")'>", title, "</span></div></div>")
 }
 
-func generate_report(days []Day, events map[Day]([]Event)) {
+func generate_report(days []Day, events map[Day]([]Event)) string {
   now_time := time.Now()
   now := now_time.Hour() * 3600 + now_time.Minute() * 60 + now_time.Second()
   today := Day(fmt.Sprintf("%04d%02d%02d", now_time.Year(), now_time.Month(), now_time.Day()))
-  fmt.Print(`<html><head><style type='text/css'>
+  output := fmt.Sprint(`<html><head><style type='text/css'>
       body { margin: 0; padding: 0; height: 100% }
       html, day { margin: 0; padding: 0; height: 100% }
       .day { width: `, 100.0 / float32(len(days)), `%; float: left }
@@ -102,24 +102,25 @@ func generate_report(days []Day, events map[Day]([]Event)) {
 
   prevname := ""
   for _, day := range days {
-    fmt.Print("<div class='day'>")
+    output += "<div class='day'>"
     prevtime := 0
     for _, event := range events[day] {
-      print_event(event.Time - prevtime, prevname)
+      output += print_event(event.Time - prevtime, prevname)
       prevtime = event.Time
       prevname = event.Name
     }
     if day == today {
-      print_event(now - prevtime, prevname)
+      output += print_event(now - prevtime, prevname)
     } else {
-      print_event(daylength - prevtime, prevname)
+      output += print_event(daylength - prevtime, prevname)
     }
-    fmt.Print("</div>")
+    output += "</div>"
   }
-  fmt.Print("</body></html>")
+  output += "</body></html>"
+  return output
 }
 
 func main() {
   days, events := read_data_file(os.Stdin)
-  generate_report(days, events)
+  fmt.Print(generate_report(days, events))
 }
