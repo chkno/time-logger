@@ -1,4 +1,6 @@
-<html><head><style type='text/css'>
+<html>
+  <head>
+    <style type='text/css'>
       body { margin: 0; padding: 0; height: 100% }
       html, day { margin: 0; padding: 0; height: 100% }
       .day { width: {{.DayWidth}}%; float: left }
@@ -21,4 +23,11 @@
         }
         document.body.style[dir] = (parseInt(document.body.style[dir] || "100%") * factor) + "%";
       }
-    </script></head><body>{{.Body}}</body></html>
+    </script>
+  </head>
+  <body>
+    {{range .Days}}
+      {{.HTML}}
+    {{end}}
+  </body>
+</html>

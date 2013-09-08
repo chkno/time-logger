@@ -19,9 +19,13 @@ type Event struct {
 	Time int
 }
 
+type TemplateDay struct {
+	HTML template.HTML
+}
+
 type TemplateData struct {
-	Body template.HTML
 	DayWidth float32
+	Days []TemplateDay
 }
 
 func read_data_file(in io.Reader) (days []Day, events map[Day]([]Event)) {
@@ -82,10 +86,9 @@ func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
 	now := now_time.Hour()*3600 + now_time.Minute()*60 + now_time.Second()
 	today := Day(fmt.Sprintf("%04d%02d%02d", now_time.Year(), now_time.Month(), now_time.Day()))
 	td.DayWidth = 100.0/float32(len(days))
-	output := ""
 	prevname := ""
 	for _, day := range days {
-		output += "<div class='day'>"
+		output := "<div class='day'>"
 		prevtime := 0
 		for _, event := range events[day] {
 			output += print_event(event.Time-prevtime, prevname)
@@ -98,8 +101,8 @@ func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
 			output += print_event(daylength-prevtime, prevname)
 		}
 		output += "</div>"
+		td.Days = append(td.Days, TemplateDay{template.HTML(output)})
 	}
-	td.Body = template.HTML(output)
 	return
 }
 
