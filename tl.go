@@ -3,6 +3,7 @@ package main
 import "bufio"
 import "crypto/sha1"
 import "fmt"
+import "html/template"
 import "io"
 import "os"
 import "strconv"
@@ -16,6 +17,10 @@ type Day string
 type Event struct {
 	Name string
 	Time int
+}
+
+type TemplateData struct {
+	HTML template.HTML
 }
 
 func read_data_file(in io.Reader) (days []Day, events map[Day]([]Event)) {
@@ -71,7 +76,7 @@ func print_event(duration int, title string) string {
 		" (", summarize_time(duration), ")'>", title, "</span></div></div>")
 }
 
-func generate_report(days []Day, events map[Day]([]Event)) string {
+func generate_report(days []Day, events map[Day]([]Event)) TemplateData {
 	now_time := time.Now()
 	now := now_time.Hour()*3600 + now_time.Minute()*60 + now_time.Second()
 	today := Day(fmt.Sprintf("%04d%02d%02d", now_time.Year(), now_time.Month(), now_time.Day()))
@@ -117,10 +122,18 @@ func generate_report(days []Day, events map[Day]([]Event)) string {
 		output += "</div>"
 	}
 	output += "</body></html>"
-	return output
+	return TemplateData{template.HTML(output)}
 }
 
 func main() {
 	days, events := read_data_file(os.Stdin)
-	fmt.Print(generate_report(days, events))
+	t := template.New("tl")
+	t, err := t.ParseFiles("tl.template")
+	if err != nil {
+		panic(err)
+	}
+	err = t.ExecuteTemplate(os.Stdout, "tl.template", generate_report(days, events))
+	if err != nil {
+		panic(err)
+	}
 }
