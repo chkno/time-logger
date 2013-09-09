@@ -2,6 +2,7 @@ package main
 
 import "bufio"
 import "crypto/sha1"
+import "errors"
 import "fmt"
 import "html/template"
 import "io"
@@ -26,7 +27,7 @@ type Report struct {
 	Days     []Day
 }
 
-func read_data_file(in io.Reader) (events []Event) {
+func read_data_file(in io.Reader) (events []Event, err error) {
 	lines := bufio.NewScanner(in)
 	line_number := 0
 	for lines.Scan() {
@@ -37,7 +38,7 @@ func read_data_file(in io.Reader) (events []Event) {
 			var err error
 			numerically[i], err = strconv.Atoi(fields[i])
 			if err != nil {
-				panic(fmt.Sprint("Field ", i, " on line ", line_number, " is not numeric"))
+				return nil, errors.New(fmt.Sprint("Field ", i, " on line ", line_number, " is not numeric: ", err))
 			}
 		}
 		events = append(events, Event{
@@ -54,7 +55,7 @@ func read_data_file(in io.Reader) (events []Event) {
 		})
 	}
 	if err := lines.Err(); err != nil {
-		panic(err)
+		return nil, err
 	}
 	return
 }
@@ -168,7 +169,10 @@ func execute_template(r Report) {
 }
 
 func main() {
-	all_events := read_data_file(os.Stdin)
+	all_events, err := read_data_file(os.Stdin)
+	if err != nil {
+		panic(err)
+	}
 	calculate_durations(all_events)
 	by_day := split_by_day(all_events)
 	backfill_first_day(&by_day[0])
