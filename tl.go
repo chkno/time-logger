@@ -15,8 +15,8 @@ const daylength = 86400 // TODO: daylight savings time
 type Day string
 
 type Event struct {
-	Name, Duration string
-	Time           int
+	Name           string
+	Time, Duration int
 	Height         float32
 }
 
@@ -64,20 +64,20 @@ func (e *Event) Color() template.CSS {
 	return template.CSS("hsl(" + strconv.Itoa(hue) + ",90%,45%)")
 }
 
-func summarize_time(duration int) string {
-	if duration > 3600 {
-		return fmt.Sprintf("%.1f hours", float32(duration)/3600)
+func (e *Event) DurationDescription() string {
+	if e.Duration > 3600 {
+		return fmt.Sprintf("%.1f hours", float32(e.Duration)/3600)
 	}
-	if duration > 60 {
-		return fmt.Sprintf("%.1f min", float32(duration)/60)
+	if e.Duration > 60 {
+		return fmt.Sprintf("%.1f min", float32(e.Duration)/60)
 	}
-	return fmt.Sprintf("%d sec", duration)
+	return fmt.Sprintf("%d sec", e.Duration)
 }
 
 func print_event(duration int, name string) (e Event) {
+	e.Duration = duration
 	e.Name = name
 	e.Height = 100 * float32(duration) / daylength
-	e.Duration = summarize_time(duration)
 	return
 }
 
