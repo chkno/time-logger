@@ -127,17 +127,21 @@ func (e *Event) Color() template.CSS {
 	return template.CSS("hsl(" + strconv.Itoa(hue) + ",90%,45%)")
 }
 
+func DescribeDuration(t time.Duration) string {
+	if t.Hours() > 24 {
+		return fmt.Sprintf("%.1f days", t.Hours()/24)
+	}
+	if t.Hours() > 1 {
+		return fmt.Sprintf("%.1f hours", t.Hours())
+	}
+	if t.Minutes() > 1 {
+		return fmt.Sprintf("%.1f min", t.Minutes())
+	}
+	return fmt.Sprintf("%.0f sec", t.Seconds())
+}
+
 func (e *Event) DurationDescription() string {
-	if e.OriginalDuration.Hours() > 24 {
-		return fmt.Sprintf("%.1f days", e.OriginalDuration.Hours()/24)
-	}
-	if e.OriginalDuration.Hours() > 1 {
-		return fmt.Sprintf("%.1f hours", e.OriginalDuration.Hours())
-	}
-	if e.OriginalDuration.Minutes() > 1 {
-		return fmt.Sprintf("%.1f min", e.OriginalDuration.Minutes())
-	}
-	return fmt.Sprintf("%.0f sec", e.OriginalDuration.Seconds())
+	return DescribeDuration(e.OriginalDuration)
 }
 
 func (e *Event) Height() float32 {
