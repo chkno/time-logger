@@ -143,20 +143,23 @@ func (e *Event) Height() float32 {
 func generate_report(days []Day) (td TemplateData) {
 	td.DayWidth = 100.0 / float32(len(days))
 	td.Days = days
+	return
+}
 
+func backfill_first_day(d *Day) {
 	// Stuff an empty event at the beginning of the first day
-	first_event_time := days[0].Events[0].Time
+	first_event_time := d.Events[0].Time
 	start_of_first_day := start_of_day(first_event_time)
 	time_until_first_event := first_event_time.Sub(start_of_first_day)
-	first_day_events := append([]Event{Event{Duration: time_until_first_event}}, days[0].Events...)
-	days[0].Events = first_day_events
-	return
+	first_day_events := append([]Event{Event{Duration: time_until_first_event}}, d.Events...)
+	d.Events = first_day_events
 }
 
 func main() {
 	all_events := read_data_file(os.Stdin)
 	calculate_durations(all_events)
 	by_day := split_by_day(all_events)
+	backfill_first_day(&by_day[0])
 	t := template.New("tl")
 	t, err := t.ParseFiles("tl.template")
 	if err != nil {
