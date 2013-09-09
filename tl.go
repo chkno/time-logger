@@ -159,20 +159,20 @@ func backfill_first_day(d *Day) {
 	d.Events = first_day_events
 }
 
-func execute_template(r Report) error {
+func execute_template(r Report, out io.Writer) error {
 	t := template.New("tl")
 	t, err := t.ParseFiles("tl.template")
 	if err != nil {
 		return err
 	}
-	err = t.ExecuteTemplate(os.Stdout, "tl.template", &r)
+	err = t.ExecuteTemplate(out, "tl.template", &r)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func view_handler(in io.Reader) error {
+func view_handler(in io.Reader, out io.Writer) error {
 	all_events, err := read_data_file(in)
 	if err != nil {
 		return err
@@ -181,7 +181,7 @@ func view_handler(in io.Reader) error {
 	by_day := split_by_day(all_events)
 	backfill_first_day(&by_day[0])
 	report := generate_report(by_day)
-	err = execute_template(report)
+	err = execute_template(report, out)
 	if err != nil {
 		return err
 	}
@@ -189,7 +189,7 @@ func view_handler(in io.Reader) error {
 }
 
 func main() {
-	if err := view_handler(os.Stdin); err != nil {
+	if err := view_handler(os.Stdin, os.Stdout); err != nil {
 		log.Fatalln(err)
 	}
 }
