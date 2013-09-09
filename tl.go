@@ -136,6 +136,10 @@ func (e *Event) Height() float32 {
 	return 100 * float32(e.Duration.Seconds()) / 86400
 }
 
+func start_of_day(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local)
+}
+
 func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
 	td.DayWidth = 100.0 / float32(len(days))
 	for i, day := range days {
@@ -143,11 +147,7 @@ func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
 		if i == 0 {
 			// Stuff an empty event at the beginning
 			first_event_time := events[day][0].Time
-			start_of_first_day := time.Date(
-				first_event_time.Year(),
-				first_event_time.Month(),
-				first_event_time.Day(),
-				0, 0, 0, 0, time.Local)
+			start_of_first_day := start_of_day(first_event_time)
 			time_until_first_event := first_event_time.Sub(start_of_first_day)
 			tday.Events = append(tday.Events, Event{Duration: time_until_first_event})
 		}
