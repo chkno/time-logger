@@ -17,7 +17,6 @@ type Day string
 type Event struct {
 	Name           string
 	Time, Duration int
-	Height         float32
 }
 
 type TemplateDay struct {
@@ -74,10 +73,13 @@ func (e *Event) DurationDescription() string {
 	return fmt.Sprintf("%d sec", e.Duration)
 }
 
+func (e *Event) Height() float32 {
+	return 100 * float32(e.Duration) / daylength
+}
+
 func print_event(duration int, name string) (e Event) {
 	e.Duration = duration
 	e.Name = name
-	e.Height = 100 * float32(duration) / daylength
 	return
 }
 
