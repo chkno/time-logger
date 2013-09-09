@@ -31,7 +31,7 @@
         {{range .Events}}
           <div class='event_outer' style='background-color: {{.Color}}; height: {{.Height}}%'>
             <div class='event_inner'>
-              <span title='{{.Title}} ({{.Duration}})'>{{.Title}}</span>
+              <span title='{{.Name}} ({{.Duration}})'>{{.Name}}</span>
             </div>
           </div>
         {{end}}

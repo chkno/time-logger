@@ -20,9 +20,9 @@ type Event struct {
 }
 
 type TemplateEvent struct {
-	Duration, Title string
-	Height          float32
-	Color           template.CSS
+	Duration, Name string
+	Height         float32
+	Color          template.CSS
 }
 
 type TemplateDay struct {
@@ -59,12 +59,12 @@ func read_data_file(in io.Reader) (days []Day, events map[Day]([]Event)) {
 	return
 }
 
-func hash_color(title string) template.CSS {
-	if title == "" {
+func hash_color(name string) template.CSS {
+	if name == "" {
 		return template.CSS("white")
 	}
 	hash := sha1.New()
-	io.WriteString(hash, title)
+	io.WriteString(hash, name)
 	hue := 360.0 * int(hash.Sum(nil)[0]) / 256.0
 	return template.CSS("hsl(" + strconv.Itoa(hue) + ",90%,45%)")
 }
@@ -79,10 +79,10 @@ func summarize_time(duration int) string {
 	return fmt.Sprintf("%d sec", duration)
 }
 
-func print_event(duration int, title string) (te TemplateEvent) {
-	te.Title = title
+func print_event(duration int, name string) (te TemplateEvent) {
+	te.Name = name
 	te.Height = 100 * float32(duration) / daylength
-	te.Color = hash_color(title)
+	te.Color = hash_color(name)
 	te.Duration = summarize_time(duration)
 	return
 }
