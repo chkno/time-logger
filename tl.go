@@ -15,11 +15,11 @@ const daylength = 86400 // TODO: daylight savings time
 type Day string
 
 type Event struct {
-	Name      string
-	Time      time.Time
-	Day       Day
-	TimeOfDay int // Seconds after midnight
-	Duration  int
+	Name             string
+	Time             time.Time
+	Day              Day
+	TimeOfDay        int // Seconds after midnight
+	IntraDayDuration int // Size in seconds of this chunk of the original event after day splitting
 }
 
 type TemplateDay struct {
@@ -89,21 +89,22 @@ func (e *Event) Color() template.CSS {
 }
 
 func (e *Event) DurationDescription() string {
-	if e.Duration > 3600 {
-		return fmt.Sprintf("%.1f hours", float32(e.Duration)/3600)
+	// TODO: Use actual Duration, not IntraDayDuration
+	if e.IntraDayDuration > 3600 {
+		return fmt.Sprintf("%.1f hours", float32(e.IntraDayDuration)/3600)
 	}
-	if e.Duration > 60 {
-		return fmt.Sprintf("%.1f min", float32(e.Duration)/60)
+	if e.IntraDayDuration > 60 {
+		return fmt.Sprintf("%.1f min", float32(e.IntraDayDuration)/60)
 	}
-	return fmt.Sprintf("%d sec", e.Duration)
+	return fmt.Sprintf("%d sec", e.IntraDayDuration)
 }
 
 func (e *Event) Height() float32 {
-	return 100 * float32(e.Duration) / daylength
+	return 100 * float32(e.IntraDayDuration) / daylength
 }
 
 func print_event(duration int, name string) (e Event) {
-	e.Duration = duration
+	e.IntraDayDuration = duration
 	e.Name = name
 	return
 }
