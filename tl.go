@@ -159,13 +159,19 @@ func backfill_first_day(d *Day) {
 	d.Events = first_day_events
 }
 
-func execute_template(r Report, out io.Writer) error {
-	t := template.New("tl")
-	t, err := t.ParseFiles("tl.template")
+var tl_template *template.Template
+
+func init() {
+	tl_template = template.New("tl")
+	var err error
+	tl_template, err = tl_template.ParseFiles("tl.template")
 	if err != nil {
-		return err
+		panic(err)
 	}
-	err = t.ExecuteTemplate(out, "tl.template", &r)
+}
+
+func execute_template(r Report, out io.Writer) error {
+	err := tl_template.ExecuteTemplate(out, "tl.template", &r)
 	if err != nil {
 		return err
 	}
