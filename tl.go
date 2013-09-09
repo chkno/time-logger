@@ -16,6 +16,7 @@ type Day string
 
 type Event struct {
 	Name      string
+	Time      time.Time
 	Day       Day
 	TimeOfDay int // Seconds after midnight
 	Duration  int
@@ -48,7 +49,17 @@ func read_data_file(in io.Reader) (events []Event) {
 		events = append(events, Event{
 			Day:       day,
 			Name:      fields[6],
-			TimeOfDay: numerically[3]*3600 + numerically[4]*60 + numerically[5]})
+			TimeOfDay: numerically[3]*3600 + numerically[4]*60 + numerically[5],
+			Time: time.Date(
+				numerically[0],
+				time.Month(numerically[1]),
+				numerically[2],
+				numerically[3],
+				numerically[4],
+				numerically[5],
+				0, // Nanoseconds
+				time.Local),
+		})
 	}
 	if err := lines.Err(); err != nil {
 		panic(err)
