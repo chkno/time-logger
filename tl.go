@@ -24,8 +24,7 @@ type Day struct {
 }
 
 type Report struct {
-	DayWidth float32
-	Days     []Day
+	Days []Day
 }
 
 func read_data_file(in io.Reader) (events []Event, err error) {
@@ -142,8 +141,11 @@ func (e *Event) Height() float32 {
 	return 100 * float32(e.Duration.Seconds()) / 86400
 }
 
+func (r *Report) DayWidth() float32 {
+	return 100.0 / float32(len(r.Days))
+}
+
 func generate_report(days []Day) (td Report) {
-	td.DayWidth = 100.0 / float32(len(days))
 	td.Days = days
 	return
 }
@@ -163,7 +165,7 @@ func execute_template(r Report) error {
 	if err != nil {
 		return err
 	}
-	err = t.ExecuteTemplate(os.Stdout, "tl.template", r)
+	err = t.ExecuteTemplate(os.Stdout, "tl.template", &r)
 	if err != nil {
 		return err
 	}
