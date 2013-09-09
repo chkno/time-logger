@@ -172,8 +172,8 @@ func execute_template(r Report) error {
 	return nil
 }
 
-func view_handler() error {
-	all_events, err := read_data_file(os.Stdin)
+func view_handler(in io.Reader) error {
+	all_events, err := read_data_file(in)
 	if err != nil {
 		return err
 	}
@@ -189,7 +189,7 @@ func view_handler() error {
 }
 
 func main() {
-	if err := view_handler(); err != nil {
+	if err := view_handler(os.Stdin); err != nil {
 		log.Fatalln(err)
 	}
 }
