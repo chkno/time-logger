@@ -21,7 +21,7 @@ type Day struct {
 	Events []Event
 }
 
-type TemplateData struct {
+type Report struct {
 	DayWidth float32
 	Days     []Day
 }
@@ -140,7 +140,7 @@ func (e *Event) Height() float32 {
 	return 100 * float32(e.Duration.Seconds()) / 86400
 }
 
-func generate_report(days []Day) (td TemplateData) {
+func generate_report(days []Day) (td Report) {
 	td.DayWidth = 100.0 / float32(len(days))
 	td.Days = days
 	return
