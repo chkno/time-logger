@@ -155,18 +155,23 @@ func backfill_first_day(d *Day) {
 	d.Events = first_day_events
 }
 
-func main() {
-	all_events := read_data_file(os.Stdin)
-	calculate_durations(all_events)
-	by_day := split_by_day(all_events)
-	backfill_first_day(&by_day[0])
+func execute_template(r Report) {
 	t := template.New("tl")
 	t, err := t.ParseFiles("tl.template")
 	if err != nil {
 		panic(err)
 	}
-	err = t.ExecuteTemplate(os.Stdout, "tl.template", generate_report(by_day))
+	err = t.ExecuteTemplate(os.Stdout, "tl.template", r)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func main() {
+	all_events := read_data_file(os.Stdin)
+	calculate_durations(all_events)
+	by_day := split_by_day(all_events)
+	backfill_first_day(&by_day[0])
+	report := generate_report(by_day)
+	execute_template(report)
 }
