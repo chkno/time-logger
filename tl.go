@@ -10,7 +10,7 @@ import "strconv"
 import "strings"
 import "time"
 
-type Day string
+type Day time.Time
 
 type Event struct {
 	Name             string
@@ -81,6 +81,7 @@ func start_of_next_day(t time.Time) time.Time {
 }
 
 func split_by_day(events []Event) (by_day [][]Event) {
+	var zero_day Day
 	var current_day Day
 	var this_day []Event
 	for _, e := range events {
@@ -95,7 +96,7 @@ func split_by_day(events []Event) (by_day [][]Event) {
 
 			}
 			if current_day != day {
-				if current_day != "" {
+				if current_day != zero_day {
 					by_day = append(by_day, this_day)
 					this_day = nil
 				}
@@ -112,7 +113,7 @@ func split_by_day(events []Event) (by_day [][]Event) {
 }
 
 func TimeDay(t time.Time) Day {
-	return Day(fmt.Sprint(t.Year(), t.Month(), t.Day()))
+	return Day(start_of_day(t))
 }
 
 func (e *Event) TimeOfDay() int {
