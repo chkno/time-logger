@@ -80,28 +80,34 @@ func start_of_next_day(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day()+1, 0, 0, 0, 0, time.Local)
 }
 
-func split_by_day(events []Event) (days []Day, by_day map[Day]([]Event)) {
-	by_day = make(map[Day]([]Event))
+func split_by_day(events []Event) (by_day [][]Event) {
+	var current_day Day
+	var this_day []Event
 	for _, e := range events {
 		for {
 			first_day_of_e := e
-			if TimeDay(e.Time) != TimeDay(e.Time.Add(e.Duration)) {
+			day := TimeDay(e.Time)
+			if TimeDay(e.Time.Add(e.Duration)) != day {
 				split_at := start_of_next_day(e.Time)
 				first_day_of_e.Duration = split_at.Sub(e.Time)
 				e.Time = split_at
 				e.Duration -= first_day_of_e.Duration
 
 			}
-			day := TimeDay(first_day_of_e.Time)
-			if len(days) == 0 || days[len(days)-1] != day {
-				days = append(days, day)
+			if current_day != day {
+				if current_day != "" {
+					by_day = append(by_day, this_day)
+					this_day = nil
+				}
+				current_day = day
 			}
-			by_day[day] = append(by_day[day], first_day_of_e)
+			this_day = append(this_day, first_day_of_e)
 			if TimeDay(first_day_of_e.Time) == TimeDay(e.Time) {
 				break
 			}
 		}
 	}
+	by_day = append(by_day, this_day)
 	return
 }
 
@@ -140,18 +146,18 @@ func (e *Event) Height() float32 {
 	return 100 * float32(e.Duration.Seconds()) / 86400
 }
 
-func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
-	td.DayWidth = 100.0 / float32(len(days))
-	for i, day := range days {
+func generate_report(events [][]Event) (td TemplateData) {
+	td.DayWidth = 100.0 / float32(len(events))
+	for i, day := range events {
 		var tday TemplateDay
 		if i == 0 {
-			// Stuff an empty event at the beginning
-			first_event_time := events[day][0].Time
+			// Stuff an empty event at the beginning of the first day
+			first_event_time := day[0].Time
 			start_of_first_day := start_of_day(first_event_time)
 			time_until_first_event := first_event_time.Sub(start_of_first_day)
 			tday.Events = append(tday.Events, Event{Duration: time_until_first_event})
 		}
-		for _, event := range events[day] {
+		for _, event := range day {
 			tday.Events = append(tday.Events, event)
 		}
 		td.Days = append(td.Days, tday)
@@ -162,13 +168,13 @@ func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
 func main() {
 	all_events := read_data_file(os.Stdin)
 	calculate_durations(all_events)
-	days, events := split_by_day(all_events)
+	by_day := split_by_day(all_events)
 	t := template.New("tl")
 	t, err := t.ParseFiles("tl.template")
 	if err != nil {
 		panic(err)
 	}
-	err = t.ExecuteTemplate(os.Stdout, "tl.template", generate_report(days, events))
+	err = t.ExecuteTemplate(os.Stdout, "tl.template", generate_report(by_day))
 	if err != nil {
 		panic(err)
 	}
