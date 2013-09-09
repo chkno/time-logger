@@ -15,9 +15,10 @@ const daylength = 86400 // TODO: daylight savings time
 type Day string
 
 type Event struct {
-	Name           string
-	Day            Day
-	Time, Duration int
+	Name      string
+	Day       Day
+	TimeOfDay int // Seconds after midnight
+	Duration  int
 }
 
 type TemplateDay struct {
@@ -42,7 +43,7 @@ func read_data_file(in io.Reader) (events []Event) {
 		}
 		time := hour*3600 + minute*60 + second
 
-		events = append(events, Event{Day: day, Name: fields[6], Time: time})
+		events = append(events, Event{Day: day, Name: fields[6], TimeOfDay: time})
 	}
 	if err := lines.Err(); err != nil {
 		panic(err)
@@ -101,8 +102,8 @@ func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
 		var tday TemplateDay
 		prevtime := 0
 		for _, event := range events[day] {
-			tday.Events = append(tday.Events, print_event(event.Time-prevtime, prevname))
-			prevtime = event.Time
+			tday.Events = append(tday.Events, print_event(event.TimeOfDay-prevtime, prevname))
+			prevtime = event.TimeOfDay
 			prevname = event.Name
 		}
 		final_event_time := daylength
