@@ -15,18 +15,14 @@ const daylength = 86400 // TODO: daylight savings time
 type Day string
 
 type Event struct {
-	Name string
-	Time int
-}
-
-type TemplateEvent struct {
-	Duration, Name string
+	Name, Duration string
+	Time           int
 	Height         float32
 	Color          template.CSS
 }
 
 type TemplateDay struct {
-	Events []TemplateEvent
+	Events []Event
 }
 
 type TemplateData struct {
@@ -51,7 +47,7 @@ func read_data_file(in io.Reader) (days []Day, events map[Day]([]Event)) {
 		if len(days) == 0 || days[len(days)-1] != day {
 			days = append(days, day)
 		}
-		events[day] = append(events[day], Event{fields[6], time})
+		events[day] = append(events[day], Event{Name: fields[6], Time: time})
 	}
 	if err := lines.Err(); err != nil {
 		panic(err)
@@ -79,11 +75,11 @@ func summarize_time(duration int) string {
 	return fmt.Sprintf("%d sec", duration)
 }
 
-func print_event(duration int, name string) (te TemplateEvent) {
-	te.Name = name
-	te.Height = 100 * float32(duration) / daylength
-	te.Color = hash_color(name)
-	te.Duration = summarize_time(duration)
+func print_event(duration int, name string) (e Event) {
+	e.Name = name
+	e.Height = 100 * float32(duration) / daylength
+	e.Color = hash_color(name)
+	e.Duration = summarize_time(duration)
 	return
 }
 
