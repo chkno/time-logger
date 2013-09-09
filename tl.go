@@ -19,7 +19,6 @@ type Event struct {
 	Time             time.Time
 	OriginalDuration time.Duration
 	Duration         time.Duration
-	IntraDayDuration int // Size in seconds of this chunk of the original event after day splitting
 }
 
 type TemplateDay struct {
@@ -123,45 +122,40 @@ func (e *Event) Color() template.CSS {
 }
 
 func (e *Event) DurationDescription() string {
-	// TODO: Use actual Duration, not IntraDayDuration
-	if e.IntraDayDuration > 3600 {
-		return fmt.Sprintf("%.1f hours", float32(e.IntraDayDuration)/3600)
+	if e.OriginalDuration.Hours() > 24 {
+		return fmt.Sprintf("%.1f days", e.OriginalDuration.Hours()/24)
 	}
-	if e.IntraDayDuration > 60 {
-		return fmt.Sprintf("%.1f min", float32(e.IntraDayDuration)/60)
+	if e.OriginalDuration.Hours() > 1 {
+		return fmt.Sprintf("%.1f hours", e.OriginalDuration.Hours())
 	}
-	return fmt.Sprintf("%d sec", e.IntraDayDuration)
+	if e.OriginalDuration.Minutes() > 1 {
+		return fmt.Sprintf("%.1f min", e.OriginalDuration.Minutes())
+	}
+	return fmt.Sprintf("%.0f sec", e.OriginalDuration.Seconds())
 }
 
 func (e *Event) Height() float32 {
-	return 100 * float32(e.IntraDayDuration) / daylength
-}
-
-func print_event(duration int, name string) (e Event) {
-	e.IntraDayDuration = duration
-	e.Name = name
-	return
+	return 100 * float32(e.Duration.Seconds()) / daylength
 }
 
 func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
-	now_time := time.Now()
-	now := now_time.Hour()*3600 + now_time.Minute()*60 + now_time.Second()
-	today := TimeDay(now_time)
 	td.DayWidth = 100.0 / float32(len(days))
-	prevname := ""
-	for _, day := range days {
+	for i, day := range days {
 		var tday TemplateDay
-		prevtime := 0
+		if i == 0 {
+			// Stuff an empty event at the beginning
+			first_event_time := events[day][0].Time
+			start_of_first_day := time.Date(
+				first_event_time.Year(),
+				first_event_time.Month(),
+				first_event_time.Day(),
+				0, 0, 0, 0, time.Local)
+			time_until_first_event := first_event_time.Sub(start_of_first_day)
+			tday.Events = append(tday.Events, Event{Duration: time_until_first_event})
+		}
 		for _, event := range events[day] {
-			tday.Events = append(tday.Events, print_event(event.TimeOfDay()-prevtime, prevname))
-			prevtime = event.TimeOfDay()
-			prevname = event.Name
+			tday.Events = append(tday.Events, event)
 		}
-		final_event_time := daylength
-		if day == today {
-			final_event_time = now
-		}
-		tday.Events = append(tday.Events, print_event(final_event_time-prevtime, prevname))
 		td.Days = append(td.Days, tday)
 	}
 	return
