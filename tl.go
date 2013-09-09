@@ -75,16 +75,16 @@ func calculate_durations(events []Event) {
 func split_by_day(events []Event) (days []Day, by_day map[Day]([]Event)) {
 	by_day = make(map[Day]([]Event))
 	for _, e := range events {
-		if len(days) == 0 || days[len(days)-1] != e.Day() {
-			days = append(days, e.Day())
+		if len(days) == 0 || days[len(days)-1] != TimeDay(e.Time) {
+			days = append(days, TimeDay(e.Time))
 		}
-		by_day[e.Day()] = append(by_day[e.Day()], e)
+		by_day[TimeDay(e.Time)] = append(by_day[TimeDay(e.Time)], e)
 	}
 	return
 }
 
-func (e *Event) Day() Day {
-	return Day(fmt.Sprint(e.Time.Year(), e.Time.Month(), e.Time.Day()))
+func TimeDay(t time.Time) Day {
+	return Day(fmt.Sprint(t.Year(), t.Month(), t.Day()))
 }
 
 func (e *Event) Color() template.CSS {
@@ -121,7 +121,7 @@ func print_event(duration int, name string) (e Event) {
 func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
 	now_time := time.Now()
 	now := now_time.Hour()*3600 + now_time.Minute()*60 + now_time.Second()
-	today := Day(fmt.Sprint(now_time.Year(), now_time.Month(), now_time.Day()))
+	today := TimeDay(now_time)
 	td.DayWidth = 100.0 / float32(len(days))
 	prevname := ""
 	for _, day := range days {
