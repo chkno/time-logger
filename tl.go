@@ -18,7 +18,6 @@ type Event struct {
 	Name             string
 	Time             time.Time
 	Duration         time.Duration
-	TimeOfDay        int // Seconds after midnight
 	IntraDayDuration int // Size in seconds of this chunk of the original event after day splitting
 }
 
@@ -46,8 +45,7 @@ func read_data_file(in io.Reader) (events []Event) {
 			}
 		}
 		events = append(events, Event{
-			Name:      fields[6],
-			TimeOfDay: numerically[3]*3600 + numerically[4]*60 + numerically[5],
+			Name: fields[6],
 			Time: time.Date(
 				numerically[0],
 				time.Month(numerically[1]),
@@ -86,6 +84,10 @@ func split_by_day(events []Event) (days []Day, by_day map[Day]([]Event)) {
 
 func TimeDay(t time.Time) Day {
 	return Day(fmt.Sprint(t.Year(), t.Month(), t.Day()))
+}
+
+func (e *Event) TimeOfDay() int {
+	return e.Time.Hour()*3600 + e.Time.Minute()*60 + e.Time.Second()
 }
 
 func (e *Event) Color() template.CSS {
@@ -129,8 +131,8 @@ func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
 		var tday TemplateDay
 		prevtime := 0
 		for _, event := range events[day] {
-			tday.Events = append(tday.Events, print_event(event.TimeOfDay-prevtime, prevname))
-			prevtime = event.TimeOfDay
+			tday.Events = append(tday.Events, print_event(event.TimeOfDay()-prevtime, prevname))
+			prevtime = event.TimeOfDay()
 			prevname = event.Name
 		}
 		final_event_time := daylength
