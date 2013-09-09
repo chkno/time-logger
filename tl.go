@@ -10,8 +10,6 @@ import "strconv"
 import "strings"
 import "time"
 
-const daylength = 86400 // TODO: daylight savings time
-
 type Day string
 
 type Event struct {
@@ -135,7 +133,7 @@ func (e *Event) DurationDescription() string {
 }
 
 func (e *Event) Height() float32 {
-	return 100 * float32(e.Duration.Seconds()) / daylength
+	return 100 * float32(e.Duration.Seconds()) / 86400
 }
 
 func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
