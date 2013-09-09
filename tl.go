@@ -6,6 +6,7 @@ import "errors"
 import "fmt"
 import "html/template"
 import "io"
+import "log"
 import "os"
 import "strconv"
 import "strings"
@@ -169,10 +170,10 @@ func execute_template(r Report) error {
 	return nil
 }
 
-func main() {
+func view_handler() error {
 	all_events, err := read_data_file(os.Stdin)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	calculate_durations(all_events)
 	by_day := split_by_day(all_events)
@@ -180,6 +181,13 @@ func main() {
 	report := generate_report(by_day)
 	err = execute_template(report)
 	if err != nil {
-		panic(err)
+		return err
+	}
+	return nil
+}
+
+func main() {
+	if err := view_handler(); err != nil {
+		log.Fatalln(err)
 	}
 }
