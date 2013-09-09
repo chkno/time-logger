@@ -72,17 +72,21 @@ func calculate_durations(events []Event) {
 	events[len(events)-1].Duration = d
 }
 
+func start_of_day(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local)
+}
+
+func start_of_next_day(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day()+1, 0, 0, 0, 0, time.Local)
+}
+
 func split_by_day(events []Event) (days []Day, by_day map[Day]([]Event)) {
 	by_day = make(map[Day]([]Event))
 	for _, e := range events {
 		for {
 			first_day_of_e := e
 			if TimeDay(e.Time) != TimeDay(e.Time.Add(e.Duration)) {
-				split_at := time.Date(
-					e.Time.Year(),
-					e.Time.Month(),
-					e.Time.Day()+1,
-					0, 0, 0, 0, time.Local)
+				split_at := start_of_next_day(e.Time)
 				first_day_of_e.Duration = split_at.Sub(e.Time)
 				e.Time = split_at
 				e.Duration -= first_day_of_e.Duration
@@ -134,10 +138,6 @@ func (e *Event) DurationDescription() string {
 
 func (e *Event) Height() float32 {
 	return 100 * float32(e.Duration.Seconds()) / 86400
-}
-
-func start_of_day(t time.Time) time.Time {
-	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local)
 }
 
 func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
