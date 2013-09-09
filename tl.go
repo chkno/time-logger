@@ -97,11 +97,11 @@ func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
 			prevtime = event.Time
 			prevname = event.Name
 		}
+		final_event_time := daylength
 		if day == today {
-			tday.Events = append(tday.Events, print_event(now-prevtime, prevname))
-		} else {
-			tday.Events = append(tday.Events, print_event(daylength-prevtime, prevname))
+			final_event_time = now
 		}
+		tday.Events = append(tday.Events, print_event(final_event_time-prevtime, prevname))
 		td.Days = append(td.Days, tday)
 	}
 	return
