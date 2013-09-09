@@ -10,8 +10,6 @@ import "strconv"
 import "strings"
 import "time"
 
-type Day time.Time
-
 type Event struct {
 	Name             string
 	Time             time.Time
@@ -81,14 +79,13 @@ func start_of_next_day(t time.Time) time.Time {
 }
 
 func split_by_day(events []Event) (by_day [][]Event) {
-	var zero_day Day
-	var current_day Day
+	var current_day time.Time
 	var this_day []Event
 	for _, e := range events {
 		for {
 			first_day_of_e := e
-			day := TimeDay(e.Time)
-			if TimeDay(e.Time.Add(e.Duration)) != day {
+			day := start_of_day(e.Time)
+			if start_of_day(e.Time.Add(e.Duration)) != day {
 				split_at := start_of_next_day(e.Time)
 				first_day_of_e.Duration = split_at.Sub(e.Time)
 				e.Time = split_at
@@ -96,24 +93,20 @@ func split_by_day(events []Event) (by_day [][]Event) {
 
 			}
 			if current_day != day {
-				if current_day != zero_day {
+				if !current_day.IsZero() {
 					by_day = append(by_day, this_day)
 					this_day = nil
 				}
 				current_day = day
 			}
 			this_day = append(this_day, first_day_of_e)
-			if TimeDay(first_day_of_e.Time) == TimeDay(e.Time) {
+			if start_of_day(first_day_of_e.Time) == start_of_day(e.Time) {
 				break
 			}
 		}
 	}
 	by_day = append(by_day, this_day)
 	return
-}
-
-func TimeDay(t time.Time) Day {
-	return Day(start_of_day(t))
 }
 
 func (e *Event) TimeOfDay() int {
