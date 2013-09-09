@@ -17,6 +17,7 @@ type Day string
 type Event struct {
 	Name             string
 	Time             time.Time
+	Duration         time.Duration
 	Day              Day
 	TimeOfDay        int // Seconds after midnight
 	IntraDayDuration int // Size in seconds of this chunk of the original event after day splitting
@@ -65,6 +66,13 @@ func read_data_file(in io.Reader) (events []Event) {
 		panic(err)
 	}
 	return
+}
+
+func calculate_durations(events []Event) {
+	for i := range events[:len(events)-1] {
+		events[i].Duration = events[i+1].Time.Sub(events[i].Time)
+	}
+	events[len(events)-1].Duration = time.Now().Sub(events[len(events)-1].Time)
 }
 
 func split_by_day(events []Event) (days []Day, by_day map[Day]([]Event)) {
@@ -135,6 +143,7 @@ func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
 
 func main() {
 	all_events := read_data_file(os.Stdin)
+	calculate_durations(all_events)
 	days, events := split_by_day(all_events)
 	t := template.New("tl")
 	t, err := t.ParseFiles("tl.template")
