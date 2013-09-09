@@ -15,8 +15,8 @@ import "time"
 type Event struct {
 	Name             string
 	Time             time.Time
-	OriginalDuration time.Duration
-	Duration         time.Duration
+	OriginalDuration time.Duration // Duration before day splitting
+	Duration         time.Duration // Intra-day (display) duration
 }
 
 type Day struct {
@@ -61,6 +61,9 @@ func read_data_file(in io.Reader) (events []Event, err error) {
 }
 
 func calculate_durations(events []Event) {
+	// The duration of an event is the difference between that event's
+	// timestamp and the following event's timestamp.  I.e., Event.Time
+	// is the beginning of the event.
 	for i := range events[:len(events)-1] {
 		d := events[i+1].Time.Sub(events[i].Time)
 		events[i].OriginalDuration = d
