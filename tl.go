@@ -32,18 +32,23 @@ type TemplateData struct {
 
 func read_data_file(in io.Reader) (events []Event) {
 	lines := bufio.NewScanner(in)
+	line_number := 0
 	for lines.Scan() {
+		line_number++
 		fields := strings.SplitN(lines.Text(), " ", 7)
-		day := Day(fields[0] + fields[1] + fields[2])
-		hour, hour_err := strconv.Atoi(fields[3])
-		minute, minute_err := strconv.Atoi(fields[4])
-		second, second_err := strconv.Atoi(fields[5])
-		if hour_err != nil || minute_err != nil || second_err != nil {
-			panic("Malformed line")
+		var numerically [6]int
+		for i := 0; i < 6; i++ {
+			var err error
+			numerically[i], err = strconv.Atoi(fields[i])
+			if err != nil {
+				panic(fmt.Sprint("Field ", i, " on line ", line_number, " is not numeric"))
+			}
 		}
-		time := hour*3600 + minute*60 + second
-
-		events = append(events, Event{Day: day, Name: fields[6], TimeOfDay: time})
+		day := Day(fields[0] + fields[1] + fields[2])
+		events = append(events, Event{
+			Day:       day,
+			Name:      fields[6],
+			TimeOfDay: numerically[3]*3600 + numerically[4]*60 + numerically[5]})
 	}
 	if err := lines.Err(); err != nil {
 		panic(err)
