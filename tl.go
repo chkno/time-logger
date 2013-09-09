@@ -75,10 +75,11 @@ func calculate_durations(events []Event) {
 func split_by_day(events []Event) (days []Day, by_day map[Day]([]Event)) {
 	by_day = make(map[Day]([]Event))
 	for _, e := range events {
-		if len(days) == 0 || days[len(days)-1] != TimeDay(e.Time) {
-			days = append(days, TimeDay(e.Time))
+		eday := TimeDay(e.Time)
+		if len(days) == 0 || days[len(days)-1] != eday {
+			days = append(days, eday)
 		}
-		by_day[TimeDay(e.Time)] = append(by_day[TimeDay(e.Time)], e)
+		by_day[eday] = append(by_day[eday], e)
 	}
 	return
 }
