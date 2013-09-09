@@ -78,9 +78,9 @@ func start_of_next_day(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day()+1, 0, 0, 0, 0, time.Local)
 }
 
-func split_by_day(events []Event) (by_day [][]Event) {
+func split_by_day(events []Event) (by_day []Day) {
 	var current_day time.Time
-	var this_day []Event
+	var this_day Day
 	for _, e := range events {
 		for {
 			first_day_of_e := e
@@ -95,11 +95,11 @@ func split_by_day(events []Event) (by_day [][]Event) {
 			if current_day != day {
 				if !current_day.IsZero() {
 					by_day = append(by_day, this_day)
-					this_day = nil
+					this_day = Day{}
 				}
 				current_day = day
 			}
-			this_day = append(this_day, first_day_of_e)
+			this_day.Events = append(this_day.Events, first_day_of_e)
 			if start_of_day(first_day_of_e.Time) == start_of_day(e.Time) {
 				break
 			}
@@ -140,18 +140,18 @@ func (e *Event) Height() float32 {
 	return 100 * float32(e.Duration.Seconds()) / 86400
 }
 
-func generate_report(events [][]Event) (td TemplateData) {
-	td.DayWidth = 100.0 / float32(len(events))
-	for i, day := range events {
+func generate_report(days []Day) (td TemplateData) {
+	td.DayWidth = 100.0 / float32(len(days))
+	for i, day := range days {
 		var tday Day
 		if i == 0 {
 			// Stuff an empty event at the beginning of the first day
-			first_event_time := day[0].Time
+			first_event_time := day.Events[0].Time
 			start_of_first_day := start_of_day(first_event_time)
 			time_until_first_event := first_event_time.Sub(start_of_first_day)
 			tday.Events = append(tday.Events, Event{Duration: time_until_first_event})
 		}
-		for _, event := range day {
+		for _, event := range day.Events {
 			tday.Events = append(tday.Events, event)
 		}
 		td.Days = append(td.Days, tday)
