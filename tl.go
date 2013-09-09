@@ -16,6 +16,7 @@ type Day string
 
 type Event struct {
 	Name           string
+	Day            Day
 	Time, Duration int
 }
 
@@ -28,8 +29,7 @@ type TemplateData struct {
 	Days     []TemplateDay
 }
 
-func read_data_file(in io.Reader) (days []Day, events map[Day]([]Event)) {
-	events = make(map[Day]([]Event))
+func read_data_file(in io.Reader) (events []Event) {
 	lines := bufio.NewScanner(in)
 	for lines.Scan() {
 		fields := strings.SplitN(lines.Text(), " ", 7)
@@ -42,13 +42,21 @@ func read_data_file(in io.Reader) (days []Day, events map[Day]([]Event)) {
 		}
 		time := hour*3600 + minute*60 + second
 
-		if len(days) == 0 || days[len(days)-1] != day {
-			days = append(days, day)
-		}
-		events[day] = append(events[day], Event{Name: fields[6], Time: time})
+		events = append(events, Event{Day: day, Name: fields[6], Time: time})
 	}
 	if err := lines.Err(); err != nil {
 		panic(err)
+	}
+	return
+}
+
+func split_by_day(events []Event) (days []Day, by_day map[Day]([]Event)) {
+	by_day = make(map[Day]([]Event))
+	for _, e := range events {
+		if len(days) == 0 || days[len(days)-1] != e.Day {
+			days = append(days, e.Day)
+		}
+		by_day[e.Day] = append(by_day[e.Day], e)
 	}
 	return
 }
@@ -108,7 +116,8 @@ func generate_report(days []Day, events map[Day]([]Event)) (td TemplateData) {
 }
 
 func main() {
-	days, events := read_data_file(os.Stdin)
+	all_events := read_data_file(os.Stdin)
+	days, events := split_by_day(all_events)
 	t := template.New("tl")
 	t, err := t.ParseFiles("tl.template")
 	if err != nil {
