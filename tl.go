@@ -17,13 +17,13 @@ type Event struct {
 	Duration         time.Duration
 }
 
-type TemplateDay struct {
+type Day struct {
 	Events []Event
 }
 
 type TemplateData struct {
 	DayWidth float32
-	Days     []TemplateDay
+	Days     []Day
 }
 
 func read_data_file(in io.Reader) (events []Event) {
@@ -143,7 +143,7 @@ func (e *Event) Height() float32 {
 func generate_report(events [][]Event) (td TemplateData) {
 	td.DayWidth = 100.0 / float32(len(events))
 	for i, day := range events {
-		var tday TemplateDay
+		var tday Day
 		if i == 0 {
 			// Stuff an empty event at the beginning of the first day
 			first_event_time := day[0].Time
