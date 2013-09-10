@@ -17,6 +17,7 @@ type Event struct {
 	Time             time.Time
 	OriginalDuration time.Duration // Duration before day splitting
 	Duration         time.Duration // Intra-day (display) duration
+	TotalDuration    time.Duration // Sum of all similarly-named Events
 }
 
 type Day struct {
@@ -72,6 +73,16 @@ func calculate_durations(events []Event) {
 	d := time.Now().Sub(events[len(events)-1].Time)
 	events[len(events)-1].OriginalDuration = d
 	events[len(events)-1].Duration = d
+}
+
+func calculate_total_durations(events []Event) {
+	totals := make(map[string]time.Duration)
+	for _, e := range events {
+		totals[e.Name] += e.Duration
+	}
+	for i, e := range events {
+		events[i].TotalDuration = totals[e.Name]
+	}
 }
 
 func start_of_day(t time.Time) time.Time {
@@ -144,6 +155,10 @@ func (e *Event) DurationDescription() string {
 	return DescribeDuration(e.OriginalDuration)
 }
 
+func (e *Event) TotalDurationDescription() string {
+	return DescribeDuration(e.TotalDuration)
+}
+
 func (e *Event) Height() float32 {
 	return 100 * float32(e.Duration.Seconds()) / 86400
 }
@@ -185,6 +200,7 @@ func view_handler(in io.Reader, out io.Writer) error {
 		return err
 	}
 	calculate_durations(all_events)
+	calculate_total_durations(all_events)
 	by_day := split_by_day(all_events)
 	backfill_first_day(&by_day[0])
 	report := generate_report(by_day)
