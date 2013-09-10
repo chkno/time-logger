@@ -3,14 +3,20 @@ package main
 import "bufio"
 import "crypto/sha1"
 import "errors"
+import "flag"
 import "fmt"
 import "html/template"
 import "io"
 import "log"
 import "os"
+import "path/filepath"
 import "strconv"
 import "strings"
 import "time"
+
+var template_path = flag.String(
+	"template_path", ".",
+	"Where to find the HTML template file")
 
 type Event struct {
 	Name             string
@@ -183,7 +189,7 @@ func backfill_first_day(d *Day) {
 
 func execute_template(r Report, out io.Writer) error {
 	t := template.New("tl")
-	t, err := t.ParseFiles("tl.template")
+	t, err := t.ParseFiles(filepath.Join(*template_path, "tl.template"))
 	if err != nil {
 		return err
 	}
@@ -212,6 +218,7 @@ func view_handler(in io.Reader, out io.Writer) error {
 }
 
 func main() {
+	flag.Parse()
 	if err := view_handler(os.Stdin, os.Stdout); err != nil {
 		log.Fatalln(err)
 	}
