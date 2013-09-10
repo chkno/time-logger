@@ -158,11 +158,12 @@ func DescribeDuration(t time.Duration) string {
 }
 
 func (e *Event) DurationDescription() string {
-	return DescribeDuration(e.OriginalDuration)
-}
+	if e.OriginalDuration == e.TotalDuration {
+		return DescribeDuration(e.OriginalDuration)
+	}
+	return (DescribeDuration(e.OriginalDuration) +
+		" of " + DescribeDuration(e.TotalDuration))
 
-func (e *Event) TotalDurationDescription() string {
-	return DescribeDuration(e.TotalDuration)
 }
 
 func (e *Event) Height() float32 {
