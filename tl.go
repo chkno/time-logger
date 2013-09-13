@@ -14,6 +14,10 @@ import "strconv"
 import "strings"
 import "time"
 
+var initial_days = flag.Int(
+	"initial_days", 14,
+	"How many days to display initially")
+
 var template_path = flag.String(
 	"template_path", ".",
 	"Where to find the HTML template file")
@@ -171,7 +175,7 @@ func (e *Event) Height() float32 {
 }
 
 func (r *Report) BodyWidth() float32 {
-	days_on_screen := 14
+	days_on_screen := *initial_days
 	if len(r.Days) < days_on_screen {
 		days_on_screen = len(r.Days)
 	}
