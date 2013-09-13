@@ -1,7 +1,7 @@
 <html>
   <head>
     <style type='text/css'>
-      body { margin: 0; padding: 0; height: 100% }
+      body { margin: 0; padding: 0; height: 100%; width: {{.BodyWidth}}% }
       html, day { margin: 0; padding: 0; height: 100% }
       .day { width: {{.DayWidth}}%; float: left }
       .event_outer { overflow: hidden; margin: 0 }
@@ -23,9 +23,13 @@
         }
         document.body.style[dir] = (parseInt(document.body.style[dir] || "100%") * factor) + "%";
       }
+      function onload_things() {
+        window.scroll(document.body.scrollWidth,0);
+        document.body.style["width"] = "{{.BodyWidth}}%";
+      }
     </script>
   </head>
-  <body>
+  <body onload="onload_things()">
     {{range .Days}}
       <div class='day'>
         {{range .Events}}

@@ -170,6 +170,14 @@ func (e *Event) Height() float32 {
 	return 100 * float32(e.Duration.Seconds()) / 86400
 }
 
+func (r *Report) BodyWidth() float32 {
+	days_on_screen := 14
+	if len(r.Days) < days_on_screen {
+		days_on_screen = len(r.Days)
+	}
+	return 100 * float32(len(r.Days)) / float32(days_on_screen)
+}
+
 func (r *Report) DayWidth() float32 {
 	return 100.0 / float32(len(r.Days))
 }
