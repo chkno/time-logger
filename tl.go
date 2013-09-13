@@ -20,6 +20,10 @@ var initial_days = flag.Int(
 	"initial_days", 14,
 	"How many days to display initially")
 
+var log_filename = flag.String(
+	"log_file", "tl.log",
+	"Where to keep the log")
+
 var template_path = flag.String(
 	"template_path", ".",
 	"Where to find the HTML template file")
@@ -215,8 +219,13 @@ func execute_template(r Report, out io.Writer) error {
 	return nil
 }
 
-func view_handler(in io.Reader, out io.Writer) error {
-	all_events, err := read_data_file(in)
+func view_handler(out io.Writer) error {
+	log_file, err := os.Open(*log_filename)
+	if err != nil {
+		return err
+	}
+	defer log_file.Close()
+	all_events, err := read_data_file(log_file)
 	if err != nil {
 		return err
 	}
@@ -234,7 +243,7 @@ func view_handler(in io.Reader, out io.Writer) error {
 
 func main() {
 	flag.Parse()
-	if err := view_handler(os.Stdin, os.Stdout); err != nil {
+	if err := view_handler(os.Stdout); err != nil {
 		log.Fatalln(err)
 	}
 }
