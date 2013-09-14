@@ -189,7 +189,7 @@ func (e *Event) Height() float32 {
 	return 100 * float32(e.Duration.Seconds()) / 86400
 }
 
-func (r *Report) BodyWidth() float32 {
+func (r Report) BodyWidth() float32 {
 	days_on_screen := *initial_days
 	if len(r.Days) < days_on_screen {
 		days_on_screen = len(r.Days)
@@ -197,7 +197,7 @@ func (r *Report) BodyWidth() float32 {
 	return 100 * float32(len(r.Days)) / float32(days_on_screen)
 }
 
-func (r *Report) DayWidth() float32 {
+func (r Report) DayWidth() float32 {
 	return 100.0 / float32(len(r.Days))
 }
 
@@ -215,13 +215,13 @@ func backfill_first_day(d *Day) {
 	d.Events = first_day_events
 }
 
-func execute_template(r Report, out io.Writer) error {
+func execute_template(template_name string, data interface{}, out io.Writer) error {
 	t := template.New("tl")
-	t, err := t.ParseFiles(filepath.Join(*template_path, "tl.template"))
+	t, err := t.ParseFiles(filepath.Join(*template_path, template_name))
 	if err != nil {
 		return err
 	}
-	err = t.ExecuteTemplate(out, "tl.template", &r)
+	err = t.ExecuteTemplate(out, template_name, data)
 	if err != nil {
 		return err
 	}
@@ -245,7 +245,7 @@ func view_handler(w http.ResponseWriter, r *http.Request) {
 	by_day := split_by_day(all_events)
 	backfill_first_day(&by_day[0])
 	report := generate_report(by_day)
-	err = execute_template(report, w)
+	err = execute_template("view.template", report, w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
