@@ -1,8 +1,10 @@
 package main
 
-import "bytes"
-import "io/ioutil"
-import "testing"
+import (
+	"bytes"
+	"io/ioutil"
+	"testing"
+)
 
 func BenchmarkView(b *testing.B) {
 	buf, err := ioutil.ReadFile("testdata")

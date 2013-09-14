@@ -1,18 +1,20 @@
 package main
 
-import "bufio"
-import "crypto/sha1"
-import "errors"
-import "flag"
-import "fmt"
-import "html/template"
-import "io"
-import "log"
-import "os"
-import "path/filepath"
-import "strconv"
-import "strings"
-import "time"
+import (
+	"bufio"
+	"crypto/sha1"
+	"errors"
+	"flag"
+	"fmt"
+	"html/template"
+	"io"
+	"log"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
+)
 
 var initial_days = flag.Int(
 	"initial_days", 14,
