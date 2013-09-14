@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -20,9 +21,17 @@ var initial_days = flag.Int(
 	"initial_days", 14,
 	"How many days to display initially")
 
+var listen_address = flag.String(
+	"listen_address", "",
+	"Local address to listen on.  Typically \"\" (permissive) or \"localhost\" (restrictive)")
+
 var log_filename = flag.String(
 	"log_file", "tl.log",
 	"Where to keep the log")
+
+var port = flag.Int(
+	"port", 29804,
+	"Port to listen on")
 
 var template_path = flag.String(
 	"template_path", ".",
@@ -219,31 +228,36 @@ func execute_template(r Report, out io.Writer) error {
 	return nil
 }
 
-func view_handler(out io.Writer) error {
+func view_handler(w http.ResponseWriter, r *http.Request) {
 	log_file, err := os.Open(*log_filename)
 	if err != nil {
-		return err
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	defer log_file.Close()
 	all_events, err := read_data_file(log_file)
 	if err != nil {
-		return err
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	calculate_durations(all_events)
 	calculate_total_durations(all_events)
 	by_day := split_by_day(all_events)
 	backfill_first_day(&by_day[0])
 	report := generate_report(by_day)
-	err = execute_template(report, out)
+	err = execute_template(report, w)
 	if err != nil {
-		return err
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	return nil
+	return
 }
 
 func main() {
 	flag.Parse()
-	if err := view_handler(os.Stdout); err != nil {
-		log.Fatalln(err)
+	http.HandleFunc("/", view_handler)
+	err := http.ListenAndServe(*listen_address+":"+strconv.Itoa(*port), nil)
+	if err != nil {
+		log.Fatal("http.ListenAndServe: ", err)
 	}
 }
