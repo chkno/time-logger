@@ -253,9 +253,61 @@ func view_handler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+func log_handler(w http.ResponseWriter, r *http.Request) {
+	err := execute_template("log.template", nil, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func write_to_log(line []byte) error {
+	log_file, err := os.OpenFile(*log_filename, os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		return errors.New(fmt.Sprint("Couldn't open log file: ", err))
+	}
+	defer log_file.Close() // Closed with error checking below
+	written, err := log_file.Write(line)
+	if err != nil {
+		if written == 0 {
+			return errors.New(fmt.Sprint("Couldn't write to log file: ", err))
+		} else {
+			return errors.New(fmt.Sprint("Only wrote ", written, " bytes to log file: ", err))
+		}
+	}
+	err = log_file.Close()
+	if err != nil {
+		return errors.New(fmt.Sprint("Couldn't close log file: ", err))
+	}
+	return nil
+}
+
+func log_submit_handler(w http.ResponseWriter, r *http.Request) {
+	w.Header()["Allow"] = []string{"POST"}
+	if r.Method != "POST" {
+		http.Error(w, "Please use POST", http.StatusMethodNotAllowed)
+		return
+	}
+	t := time.Now().Format("2006 01 02 15 04 05 ")
+	thing := strings.Replace(r.FormValue("thing"), "\n", "", -1)
+	err := write_to_log([]byte(t + thing + "\n"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = execute_template("log_submit.template", nil, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 func main() {
 	flag.Parse()
-	http.HandleFunc("/", view_handler)
+	http.HandleFunc("/view", view_handler)
+	http.HandleFunc("/log", log_handler)
+	http.HandleFunc("/log_submit", log_submit_handler)
 	err := http.ListenAndServe(*listen_address+":"+strconv.Itoa(*port), nil)
 	if err != nil {
 		log.Fatal("http.ListenAndServe: ", err)
