@@ -1,1 +1,4 @@
-<html><body onload="location='log';"></body></html>
+<html>
+  <body onload="location='log';">
+  </body>
+</html>
